@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR家具シミュレーションアプリ</title>
+    <!-- A-Frameとaframe-arライブラリをCDNから読み込みます -->
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-ar/dist/aframe-ar.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            color: white;
+            text-align: center;
+        }
+        #instructions {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 999;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            pointer-events: none;
+            display: block; /* 初期表示 */
+        }
+    </style>
+</head>
+<body>
+    <!-- ユーザーへの操作指示メッセージ -->
+    <div id="instructions">
+        <h2>アプリを起動しています...</h2>
+        <p>カメラを床や平らな場所に向けてください。</p>
+        <p>平面が検出されたら、画面をタップしてモデルを配置できます。</p>
+    </div>
+
+    <!-- ARシーンの定義 -->
+    <a-scene ar-hit-test="target:#furniture; on-add:#furniture-added;" embedded>
+        <!-- assetsタグ内に3Dモデルを定義します -->
+        <a-assets>
+            <a-asset-item id="rocks_trees_ao" response-type="arraybuffer" src="rocks_trees_ao.glb"></a-asset-item>
+        </a-assets>
+
+        <!-- カメラとライトの設定 -->
+        <a-entity camera></a-entity>
+        <a-light type="directional" position="1 1 1" intensity="0.5"></a-light>
+        <a-light type="ambient" intensity="0.5"></a-light>
+
+        <!-- 配置する3Dモデルのコンテナ。gltf-model属性で読み込みます -->
+        <a-entity id="furniture-container" visible="false">
+            <a-gltf-model id="furniture" src="#rocks_trees_ao" position="0 0 0" scale="0.1 0.1 0.1"></a-gltf-model>
+        </a-entity>
+    </a-scene>
+
+    <script>
+        // 平面が検出され、オブジェクトが配置された後に実行される関数
+        const instructions = document.getElementById('instructions');
+        
+        // 'ar-hit-test'コンポーネントがオブジェクトを配置すると、このイベントが発生します
+        document.querySelector('a-scene').addEventListener('model-placed', function(event) {
+            // 指示メッセージを非表示にします
+            instructions.style.display = 'none';
+        });
+
+        document.querySelector('a-scene').addEventListener('ar-ready', function(event) {
+            instructions.innerHTML = '<h2>平面を検出中...</h2><p>カメラを動かして床や壁を探してください。</p><p>画面をタップすると、モデルが配置されます。</p>';
+        });
+    </script>
+</body>
+</html>
